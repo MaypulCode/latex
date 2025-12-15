@@ -1,0 +1,10 @@
+# vscode
+.vscode
+
+# Node.js
+node_modules
+package-lock.json
+package.json
+
+# textlint
+.textlintrc.json
