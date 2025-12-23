@@ -1,0 +1,72 @@
+\renewcommand{\bibname}{参考文献}
+\newcommand{\acknowledgmentname}{謝辞}
+\renewcommand{\appendixname}{付録}
+\newcommand{\argmax}{\operatornamewithlimits{\mathrm{arg\,max}}}
+\newcommand{\argmin}{\operatornamewithlimits{\mathrm{arg\,min}}}
+
+% 適宜追加
+\usepackage{here}
+\usepackage{ascmac}
+\usepackage{comment}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{sotsuron}
+\usepackage{pifont}
+\usepackage{amsmath,cases}
+\usepackage{amssymb}
+\usepackage[]{multicol}
+\usepackage{bm}
+\usepackage{url}
+\usepackage{cite}
+\usepackage{color}
+\usepackage{siunitx}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+\usepackage{doi}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+% DOIリンクの設定
+\renewcommand{\doitext}{DOI: }
+\urlstyle{same}
+
+% 参照
+% http://tug.ctan.org/tex-archive/macros/latex/contrib/cleveref/cleveref.pdf
+\usepackage{cleveref}
+\crefname{enumi}{}{}
+\crefname{equation}{式}{式}
+\crefname{figure}{図}{図}
+\crefname{table}{表}{表}
+\crefname{algorithm}{アルゴリズム}{アルゴリズム}
+\crefformat{chapter}{第#2#1#3章}
+\crefformat{section}{#2#1#3節}
+\crefformat{subsection}{#2#1#3項}
+\newcommand{\crefpairconjunction}{と}
+\newcommand{\crefrangeconjunction}{から}
+\newcommand{\crefmiddleconjunction}{，}
+\newcommand{\creflastconjunction}{，および}
+
+% 適宜追加
+\graphicspath{
+	{./figure/01/}
+		{./figure/02/}
+}
+
+\bindermode% バインダ用余白設定
+
+% 日本語情報
+\jclass{卒業論文}
+\jtitle{V2V通信向けHARQを伴う適応型SINR予測を用いた \\ 動的帯域切り替え方式の提案}
+\jdepart{I\hspace{-.1em}I類}{情報通信工学プログラム}
+\jauthor{鐘ヶ江 僚太}
+\jnumber{2210177}
+\jadvisor{藤井 威生}{教授}
+\jhyear{6}
+% 提出日
+\jdeadhyear{8}
+\jmonth{1}
+\jday{10}
+
+%------------------------------------------------------------------------%
+
+\renewcommand{\baselinestretch}{1.05}

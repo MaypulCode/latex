@@ -1,0 +1,151 @@
+% 変数定義
+\makeatletter
+
+% 変数読み込み
+\def\jclass#1{\gdef\@jclass{#1}}
+\def\jtitle#1{\gdef\@jtitle{#1}}														%タイトル
+\def\juniv#1{\gdef\@juniv{#1}}													%大学名
+\def\jdepart#1#2{\gdef\@jdepart{#1}\gdef\@jcourse{#2}}			%学科，コース
+\def\jauthor#1{\gdef\@jauthor{#1}}												%著者
+\def\jnumber#1{\gdef\@jnumber{#1}}											%学籍番号
+\def\jadvisor#1#2{\gdef\@jadvisor{#1}\gdef\@jposition{#2}}		%指導教員
+\def\jhyear#1{\gdef\@jhyear{#1}}													%年号
+\def\jdeadhyear#1{\gdef\@jdeadhyear{#1}}									%締め切り年号
+\def\jmonth#1{\gdef\@jmonth{#1}}												%月
+\def\jday#1{\gdef\@jday{#1}}														%日
+\def\jkeyword#1{\gdef\@jkeyword{#1}}										%キーワード
+
+% 余白設定（左綴じ用）
+\newcommand{\bindermode}{%
+  \setlength{\textwidth}{15.92cm}
+  \setlength{\oddsidemargin}{5mm}
+  \setlength{\evensidemargin}{0mm}
+  \setlength{\topmargin}{-1cm}
+  \setlength{\textheight}{23.5cm}
+  \setlength{\footskip}{18mm}
+}
+
+% 表紙用行間広め定義
+\newenvironment{lineskiptitle}{%
+	\baselineskip = 1.5cm
+}
+
+% 表紙の定義（日本語）
+\def\jmaketitle{\par
+	\begingroup
+	\@jmaketitle
+	\endgroup
+}
+
+\def\@jmaketitle{
+  \thispagestyle{empty}
+  \begin{center}
+    {\LARGE \ } \\
+    {\LARGE \ } \\
+    {\LARGE \ } \\
+    {\LARGE  令和\@jhyear 年度　\@jclass}
+    \vspace{20mm}\par
+    \begin{lineskiptitle}
+      {\LARGE  \@jtitle}
+    \end{lineskiptitle}
+    \vspace{30mm}
+    \renewcommand{\arraystretch}{1.5}
+    \begin{table}[h]
+      \begin{center}
+        \LARGE
+        \begin{tabular}{p{8zw}lp{10zw}l}
+          学籍番号 & \@jnumber \\
+          氏　　名 & \@jauthor　\\
+          指導教員 & \@jadvisor　\@jposition \\
+          電気通信大学 & 情報理工学域 \\
+          \multicolumn{2}{c}{II類} \\
+          \multicolumn{2}{c}{情報通信工学プログラム} \\
+          \multicolumn{2}{c}{提出日　令和\@jdeadhyear 年\@jmonth 月\@jday 日}
+        \end{tabular}
+      \end{center}
+    \end{table}
+    \renewcommand{\arraystretch}{1.0}
+  \end{center}
+  \newpage
+  \pagenumbering{roman}
+}
+
+% アブストラクトの定義（日本語）
+\newenvironment{jabstract}{%
+	{\LARGE \noindent  概要}
+        \vspace{1cm}\par
+	\parindent=1zw
+	\ifjapanese \else \renewcommand{\baselinestretch}{1.15}\selectfont \fi
+}{
+	\newpage
+	\ifjapanese \parindent=1zw \else \parindent=1.6zw \fi
+	\renewcommand{\baselinestretch}{1.0}\selectfont
+}
+
+%チャプターの定義
+\def\@makechapterhead#1{\hbox{}%
+  %\vskip2\Cvs
+  {\parindent\z@
+   \raggedright
+   \reset@font\LARGE
+   \leavevmode
+   \ifnum \c@secnumdepth >\m@ne
+     \setlength\@tempdima{\linewidth}%
+     \setbox\z@\hbox{\@chapapp\thechapter\@chappos\hskip1zw}%
+     \addtolength\@tempdima{-\wd\z@}%
+     \unhbox\z@\nobreak
+     \vtop{\hsize\@tempdima#1}%
+   \else
+     #1\relax
+   \fi}\nobreak\vskip3\Cvs}
+\def\@schapter#1{%
+  \@makeschapterhead{#1}\@afterheading
+}
+\def\@makeschapterhead#1{\hbox{}%
+  %%\vskip2\Cvs
+  {\parindent\z@
+   \raggedright
+   \reset@font\LARGE\bfseries
+   \leavevmode
+   \setlength\@tempdima{\linewidth}%
+   \vtop{\hsize\@tempdima#1}}\vskip3\Cvs}
+
+% 目次環境再定義
+\renewcommand{\tableofcontents}{%
+	\section*{\contentsname}
+	\@starttoc{toc}
+	\newpage
+}
+
+% 謝辞環境の作成
+\newenvironment{acknowledgment}{%
+	\addcontentsline{toc}{chapter}{\acknowledgmentname}
+	\chapter*{ \acknowledgmentname}					%センタリング
+}
+
+% 参考文献環境の作成
+\newenvironment{bib}[1][100]{%
+	\addcontentsline{toc}{chapter}{\bibname}
+	\bibliography{mitola}
+}
+
+% 付録環境の作成
+\renewenvironment{appendix}{
+  \addcontentsline{toc}{chapter}{\appendixname}
+  \chapter*{\appendixname}
+}
+
+% subsubsection 環境の設定変更
+\setcounter{secnumdepth}{3}
+\renewcommand\thesubsubsection{(\arabic{subsubsection})}
+
+% 箇条書きの行間設定
+\renewenvironment{itemize}{%
+   \begin{list}{\parbox{1zw}{$\bullet$}}{%
+      \setlength{\itemsep}{0em}
+      \setlength{\parsep}{0em}
+   }}{%
+   \end{list}
+}
+
+\makeatother

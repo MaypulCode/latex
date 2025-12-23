@@ -1,0 +1,49 @@
+\chapter{システムモデル}\label{chap:system_model}
+本章では，本研究で想定するシステムモデルを定義する．
+まず，V2V通信を行う道路環境と車両配置について述べ，次にデュアルバンド構成の詳細を説明する．
+続いて，ミリ波通信に影響を与える遮蔽モデルについて述べ，最後にシミュレーションで使用する通信パラメータを示す．
+
+\section{伝搬モデル}
+ローカル5G（L5G）では，免許申請時にカバーエリアおよび調整対象区域を算出するために，総務省が定めた伝搬モデルに基づく計算が求められる．
+本節では，L5G免許申請支援マニュアル\cite{l5g_manual}に基づき，4.6--4.9GHz帯であるSub6での伝搬モデルについて述べる．
+
+\subsection{受信電力の算出}
+受信電力$P_r$は，以下の式で算出される：
+\begin{equation}
+    P_r = P_t + G_t - L_f + G_r - L - M
+    \label{eq:received_power}
+\end{equation}
+ここで，$P_t$\,\si{[dBm]}は送信電力（基地局の空中線電力），$G_t$\,\si{[dBi]}は送信アンテナ利得，$L_f$\,\si{[dB]}は基地局の給電線損失，$G_r$\,\si{[dBi]}は受信アンテナ利得，$L$\,\si{[dB]}は伝搬損失，$M$\,\si{[dB]}はマージンである．マージンはSub6の場合8\,\si{dB}が規定されている．
+
+\subsection{4.6--4.9GHz帯の伝搬損失モデル}
+4.7GHz帯（Sub-6）における伝搬損失$L$は，自由空間伝搬損失式および拡張秦式を基礎として，基地局と陸上移動局間の距離$d_{xy}$\,\si{[km]}に応じて以下のように算出される．
+
+\subsubsection{近距離（$d_{xy} \leq 0.04$\,km）}
+距離が40\,m以下の場合，自由空間伝搬損失式を用いる：
+\begin{equation}
+    L = L_0 = 32.4 + 20\log_{10}(f) + 10\log_{10}\left\{\frac{d_{xy}^2 + (H_b - H_m)^2}{10^6}\right\} + R
+    \label{eq:l0_sub6}
+\end{equation}
+ここで，$f$\,\si{[MHz]}は使用周波数，$H_b$\,\si{[m]}は基地局の空中線地上高，$H_m$\,\si{[m]}は移動局の空中線地上高，$R$\,\si{[dB]}は建物侵入損（屋内設置の場合16.2\,\si{dB}）である．
+
+\subsubsection{中距離（$0.04 < d_{xy} < 0.1$\,km）}
+距離が40\,mを超え100\,m未満の場合，近距離モデルと遠距離モデルの補間を行う：
+\begin{equation}
+    L = L_0 + \{2.51 \times \log_{10}(d_{xy}) + 3.51\} \times (L_H - L_0)
+    \label{eq:interpolation}
+\end{equation}
+
+\subsubsection{遠距離（$d_{xy} \geq 0.1$\,km）}
+距離が100\,m以上の場合，拡張秦式を用いる：
+\begin{align}
+    L = L_H = & \, 46.3 + 33.9\log_{10}(2000) + 10\log_{10}\left(\frac{f}{2000}\right) \nonumber     \\
+              & - 13.82\log_{10}(\max(30, H_b)) \nonumber                                            \\
+              & + \{44.9 - 6.55\log_{10}(\max(30, H_b))\} \cdot (\log_{10}(d_{xy}))^\alpha \nonumber \\
+              & - a(H_m) - b(H_b) + R - K - S
+    \label{eq:extended_hata}
+\end{align}
+ここで，$\alpha$は遠距離に対する係数，$a(H_m)$は移動局高に対する補正項，$b(H_b)$は基地局高に対する補正項である．
+$S$は環境による補正値であり，市街地では0.0\,\si{dB}，郊外地では12.3\,\si{dB}，開放地では32.5\,\si{dB}が適用される．
+
+
+
