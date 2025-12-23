@@ -2,3 +2,45 @@
 本章では，提案するHARQ連携型予測帯域切替手法の詳細を説明する．
 まず提案手法の概要を述べ，次に傾向予測アルゴリズム，急激変化検知アルゴリズム，および切替判断アルゴリズムについて数式を交えて詳述する．
 最後に，HARQとの連携機構と計算量の評価について述べる．
+
+\section{周波数利用効率}
+本システムにおける周波数利用効率の定義および予測モデルについて述べる．
+一般に，システム帯域幅を $B$ [Hz]，スループットを $R$ [bit/s] とすると，周波数利用効率 $\eta _{\mathrm{SE}}$ [bit/s/Hz] は次式で定義される．
+
+\begin{equation}
+    \eta _{\mathrm{SE}} = \frac{R}{B}
+    \label{eq:spectral_efficiency_basic}
+\end{equation}
+
+本研究では，直前の観測期間 $T$ [s] における観測値に基づき，次に割り当てるリソースブロック (RB) 数 $N_{\mathrm{next}}$ に対するスループットおよび周波数利用効率を予測する．
+
+まず，物理層における最大伝送容量を推定する．
+直前の期間 $T$ において実際に割り当てられたRB数を $N_{\mathrm{obs}}$，観測された平均スループットを $R_{\mathrm{obs}}$ [bit/s]，観測された平均パケットドロップレートを $P_{\mathrm{drop}}$とする．このとき，現在の通信環境における単位RBあたりの伝送効率に基づき，次のステップにおける物理層容量 $C$ [bit/s] は次式で推定される．
+
+\begin{equation}
+    C = R_{\mathrm{obs}} \cdot \frac{N_{\mathrm{next}}}{N_{\mathrm{obs}}} \cdot (1 - P_{\mathrm{drop}})
+    \label{eq:physical_capacity}
+\end{equation}
+
+次に，トラフィックの需要を算出する．
+期間 $T$ における平均パケット到来率を $\lambda$ [bit/s]，平均パケット遅延を $D$ [s] とすると，リトルの法則に基づき，システムが処理すべき必要レート $R_{\mathrm{req}}$ [bit/s] は次式で表される．
+
+\begin{equation}
+    R_{\mathrm{req}} = \lambda + \frac{\lambda D}{T}
+    \label{eq:traffic_demand}
+\end{equation}
+
+ここで，式 (\ref{eq:traffic_demand}) の第2項はバッファ内の滞留データ（バックログ）を期間 $T$ で解消するために必要な追加帯域を表す．
+実効的な予測スループット $R_{\mathrm{est}}$ [bit/s] は，物理容量 $C$ とトラフィック需要 $R_{\mathrm{req}}$ のボトルネックとして算出される．
+
+\begin{equation}
+    R_{\mathrm{est}} = \min \left( C, \ R_{\mathrm{req}} \right)
+    \label{eq:throughput_prediction}
+\end{equation}
+
+最終的に，1 システムの帯域幅を $W$ [Hz]，システムの合計 RB 数を $R_{\mathrm{total}}$ とすると，RB数 $N_{\mathrm{next}}$ を割り当てた際の予測周波数利用効率 $\eta_{\mathrm{SE}}$ は次式となる．
+
+\begin{equation}
+    \eta_{\mathrm{SE}} = \frac{N_{\mathrm{total}} \cdot R_{\mathrm{est}}}{N_{\mathrm{next}} \cdot W}
+    \label{eq:predicted_se}
+\end{equation}
