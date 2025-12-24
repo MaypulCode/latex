@@ -1,0 +1,12 @@
+PWD /home/awcc/latex/communications_law
+INPUT /etc/texmf/web2c/texmf.cnf
+INPUT /usr/share/texmf/web2c/texmf.cnf
+INPUT /usr/share/texlive/texmf-dist/web2c/texmf.cnf
+INPUT /etc/texmf/web2c/texmf.cnf
+INPUT /usr/share/texmf/web2c/texmf.cnf
+INPUT /usr/share/texlive/texmf-dist/web2c/texmf.cnf
+INPUT /var/lib/texmf/web2c/euptex/platex.fmt
+INPUT main.tex
+OUTPUT main.log
+INPUT /usr/share/texlive/texmf-dist/tex/platex/jsclasses/jsarticle.cls
+INPUT /usr/share/texlive/texmf-dist/tex/platex/jsclasses/jsarticle.cls

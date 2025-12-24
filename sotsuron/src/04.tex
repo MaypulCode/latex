@@ -4,43 +4,97 @@
 最後に，HARQとの連携機構と計算量の評価について述べる．
 
 \section{周波数利用効率}
-本システムにおける周波数利用効率の定義および予測モデルについて述べる．
-一般に，システム帯域幅を $B$ [Hz]，スループットを $R$ [bit/s] とすると，周波数利用効率 $\eta _{\mathrm{SE}}$ [bit/s/Hz] は次式で定義される．
+本システムにおける周波数利用効率 (Spectral Efficiency: SE) の定義および予測モデルについて述べる．
+システム全体の帯域幅を $W$ [Hz]，システムの総リソースブロック (RB) 数を $N_{\mathrm{RB}}^{\mathrm{total}}$ とする．
+ある基地局に割り当てられたRB数を $N_{\mathrm{RB}}$，そのセルスループットを $R$ [bps] とすると，当該基地局に割り当てられた帯域幅 $B$ [Hz] は次式で表される．
 
 \begin{equation}
-    \eta _{\mathrm{SE}} = \frac{R}{B}
+    B = W \cdot \frac{N_{\mathrm{RB}}}{N_{\mathrm{RB}}^{\mathrm{total}}}
+    \label{eq:assigned_bandwidth}
+\end{equation}
+
+したがって，周波数利用効率 $\eta_{\mathrm{SE}}$ [bps/Hz] は次式で定義される．
+
+\begin{equation}
+    \eta_{\mathrm{SE}} = \frac{R}{B} = \frac{R}{W} \cdot \frac{N_{\mathrm{RB}}^{\mathrm{total}}}{N_{\mathrm{RB}}}
     \label{eq:spectral_efficiency_basic}
 \end{equation}
 
-本研究では，直前の観測期間 $T$ [s] における観測値に基づき，次に割り当てるリソースブロック (RB) 数 $N_{\mathrm{next}}$ に対するスループットおよび周波数利用効率を予測する．
+本研究では，RB割り当ておよび送信電力制御の同時最適化を行う．
+直前の観測期間 $T$ [s] における観測値に基づき，次ステップで割り当てるRB数 $N_{\mathrm{RB}}^{\mathrm{alloc}}$ および基地局の総送信電力 $P_{\mathrm{t}}$ [W] に対するスループットを予測する．
 
 まず，物理層における最大伝送容量を推定する．
-直前の期間 $T$ において実際に割り当てられたRB数を $N_{\mathrm{obs}}$，観測された平均スループットを $R_{\mathrm{obs}}$ [bit/s]，観測された平均パケットドロップレートを $P_{\mathrm{drop}}$とする．このとき，現在の通信環境における単位RBあたりの伝送効率に基づき，次のステップにおける物理層容量 $C$ [bit/s] は次式で推定される．
+直前の期間 $T$ において当該基地局に割り当てられたRB数を $N_{\mathrm{RB}}^{\mathrm{obs}}$，観測されたセルスループットを $R_{\mathrm{obs}}$ [bps] とする．
+このとき，観測された周波数利用効率に基づき，セル内の実効的なSINR（Signal-to-Interference-plus-Noise Ratio）$\gamma_{\mathrm{obs}}$ は，シャノンの公式の逆関数を用いて次式で導出できる．
 
 \begin{equation}
-    C = R_{\mathrm{obs}} \cdot \frac{N_{\mathrm{next}}}{N_{\mathrm{obs}}} \cdot (1 - P_{\mathrm{drop}})
+    \gamma_{\mathrm{obs}} = 2^{\eta_{\mathrm{SE}}^{\mathrm{obs}}} - 1 = 2^{\left( \frac{R_{\mathrm{obs}}}{W} \cdot \frac{N_{\mathrm{RB}}^{\mathrm{total}}}{N_{\mathrm{RB}}^{\mathrm{obs}}} \right)} - 1
+    \label{eq:estimated_sinr}
+\end{equation}
+
+次に，観測時の基地局総送信電力を $P_{\mathrm{t}}^{\mathrm{ref}}$ [W] とする．
+次ステップにおいて総送信電力を $P_{\mathrm{t}}$，割り当てRB数を $N_{\mathrm{RB}}^{\mathrm{alloc}}$ に変更した場合，単位周波数あたりの電力密度および受信雑音帯域幅の変化を考慮すると，予測SINR $\hat{\gamma}$ は次式でスケーリングされる．
+
+\begin{equation}
+    \hat{\gamma}\left(P_{\mathrm{t}}, N_{\mathrm{RB}}^{\mathrm{alloc}}\right) = \gamma_{\mathrm{obs}} \cdot \frac{P_{\mathrm{t}}}{P_{\mathrm{t}}^{\mathrm{ref}}} \cdot \frac{N_{\mathrm{RB}}^{\mathrm{obs}}}{N_{\mathrm{RB}}^{\mathrm{alloc}}}
+    \label{eq:scaled_sinr}
+\end{equation}
+
+これより，決定変数 $P_{\mathrm{t}}$ と $N_{\mathrm{RB}}^{\mathrm{alloc}}$ を用いた場合の物理層容量 $C$ [bps] は次式で推定される．
+
+\begin{equation}
+    C = \left( W \cdot \frac{N_{\mathrm{RB}}^{\mathrm{alloc}}}{N_{\mathrm{RB}}^{\mathrm{total}}} \right) \cdot \log_2 \left( 1 + \hat{\gamma}\left(P_{\mathrm{t}}, N_{\mathrm{RB}}^{\mathrm{alloc}}\right) \right) \cdot \left(1 - P_{\mathrm{out}}\right)
     \label{eq:physical_capacity}
 \end{equation}
 
 次に，トラフィックの需要を算出する．
-期間 $T$ における平均パケット到来率を $\lambda$ [bit/s]，平均パケット遅延を $D$ [s] とすると，リトルの法則に基づき，システムが処理すべき必要レート $R_{\mathrm{req}}$ [bit/s] は次式で表される．
+期間 $T$ における平均パケット到着率を $\lambda$ [bps]，平均パケット遅延を $\bar{D}$ [s] とすると，リトルの法則に基づき，システムが処理すべき必要レート $R_{\mathrm{req}}$ [bps] は次式で表される．
 
 \begin{equation}
-    R_{\mathrm{req}} = \lambda + \frac{\lambda D}{T}
+    R_{\mathrm{req}} = \lambda + \frac{\lambda \bar{D}}{T}
     \label{eq:traffic_demand}
 \end{equation}
 
-ここで，式 (\ref{eq:traffic_demand}) の第2項はバッファ内の滞留データ（バックログ）を期間 $T$ で解消するために必要な追加帯域を表す．
-実効的な予測スループット $R_{\mathrm{est}}$ [bit/s] は，物理容量 $C$ とトラフィック需要 $R_{\mathrm{req}}$ のボトルネックとして算出される．
+実効的な予測セルスループット $\hat{R}$ [bps] は，物理容量 $C$ とトラフィック需要 $R_{\mathrm{req}}$ のボトルネックとして算出される．
 
 \begin{equation}
-    R_{\mathrm{est}} = \min \left( C, \ R_{\mathrm{req}} \right)
+    \hat{R} = \min \left( C, R_{\mathrm{req}} \right)
     \label{eq:throughput_prediction}
 \end{equation}
 
-最終的に，1 システムの帯域幅を $W$ [Hz]，システムの合計 RB 数を $R_{\mathrm{total}}$ とすると，RB数 $N_{\mathrm{next}}$ を割り当てた際の予測周波数利用効率 $\eta_{\mathrm{SE}}$ は次式となる．
+最終的に，予測周波数利用効率 $\hat{\eta}_{\mathrm{SE}}$ は次式となる．
 
 \begin{equation}
-    \eta_{\mathrm{SE}} = \frac{N_{\mathrm{total}} \cdot R_{\mathrm{est}}}{N_{\mathrm{next}} \cdot W}
+    \hat{\eta}_{\mathrm{SE}} = \frac{\hat{R}}{W} \cdot \frac{N_{\mathrm{RB}}^{\mathrm{total}}}{N_{\mathrm{RB}}^{\mathrm{alloc}}}
     \label{eq:predicted_se}
 \end{equation}
+
+\section{エネルギー効率}
+次に，本システムにおけるエネルギー効率 (Energy Efficiency: EE) の定義および予測モデルについて述べる．
+エネルギー効率 $\eta_{\mathrm{EE}}$ [bits/J] は，消費電力に対するスループットの比として次式で定義される．
+
+\begin{equation}
+    \eta_{\mathrm{EE}} = \frac{R}{P_{\mathrm{c}}}
+    \label{eq:energy_efficiency_basic}
+\end{equation}
+
+ここで，$R$ はスループット [bps]であり，$P_{\mathrm{c}}$ は総消費電力 [W] とする．
+
+本研究では，システムの総消費電力 $P_{\mathrm{c}}$ [W] を，固定電力と送信電力に依存する変動電力の和としてモデル化する．
+ここで，固定回路電力を $P_{\mathrm{c}}^{\mathrm{fix}}$ [W]，基地局の総送信電力を $P_{\mathrm{t}}$ [W] とする．
+また，ローカル5G基地局（Sub6帯）における電力増幅器の効率 $\eta_{\mathrm{PA}}$ を約 40\% と想定し，その逆数である消費電力係数を $\xi = 1/\eta_{\mathrm{PA}} = 2.5$ と設定する．
+これに基づき，総消費電力は次式で表される．
+
+\begin{equation}
+    P_{\mathrm{c}} = P_{\mathrm{c}}^{\mathrm{fix}} + \xi P_{\mathrm{t}}
+    \label{eq:power_consumption_model}
+\end{equation}
+
+したがって，予測エネルギー効率 $\hat{\eta}_{\mathrm{EE}}$ は次式により算出される．
+
+\begin{equation}
+    \hat{\eta}_{\mathrm{EE}} = \frac{\hat{R}}{P_{\mathrm{c}}^{\mathrm{fix}} + \xi P_{\mathrm{t}}}
+    \label{eq:predicted_ee}
+\end{equation}
+
+\begin{equation} \hat{\gamma}^{\mathrm{M}}(P_{\mathrm{t}}^{\mu}) = \gamma_{\mathrm{obs}}^{\mathrm{M}} \cdot \frac{1}{1 + \beta \cdot P_{\mathrm{t}}^{\mu}} \end{equation}
