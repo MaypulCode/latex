@@ -20,7 +20,7 @@ $pdf_mode = 3;
 $out_dir = '.';
 
 # Main file
-@default_files = ('kato.tex');
+@default_files = ('main.tex');
 
 # Exclude _preamble.tex from auto-compilation
 $do_cd = 1;

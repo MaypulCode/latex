@@ -1,11 +1,11 @@
 #!/usr/bin/env perl
 
 # LaTeX processor
-$latex = 'platex -synctex=1 -halt-on-error -interaction=nonstopmode';
-$latex_silent = 'platex -synctex=1 -halt-on-error -interaction=batchmode';
+$latex = 'uplatex -synctex=1 -halt-on-error -interaction=nonstopmode';
+$latex_silent = 'uplatex -synctex=1 -halt-on-error -interaction=batchmode';
 
 # BibTeX processor
-$bibtex = 'pbibtex';
+$bibtex = 'upbibtex';
 
 # Index processor
 $makeindex = 'mendex %O -o %D %S';
