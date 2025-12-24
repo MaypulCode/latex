@@ -1,0 +1,127 @@
+{
+  "textlint.nodePath": "/home/awcc/.nvm/versions/node/v24.12.0/bin/node",
+  "textlint.run": "onType",
+  "[bibtex]": {
+    "editor.defaultFormatter": "James-Yu.latex-workshop"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.textlint": "explicit"
+  },
+  "explorer.fileNesting.patterns": {
+    "*.pdf": "${capture}.pptx",
+    "*.tex": "${capture}.pdf"
+  },
+  "files.associations": {
+    "*.tex": "latex"
+  },
+  "files.autoSave": "onFocusChange",
+  "files.exclude": {
+    "**/__latexindent_temp.tex": true,
+    "**/__pycache__": true,
+    "**/_markdown_*/": true,
+    "**/_minted-*/": true,
+    "**/.DS_Store": true,
+    "**/.git": true,
+    "**/.hg": true,
+    "**/.svn": true,
+    "**/*-blx.bib": true,
+    "**/*.7z": true,
+    "**/*.asv": true,
+    "**/*.atfi": true,
+    "**/*.aux": true,
+    // "**/*_template.pdf": true,
+    // "**/*.log": true
+    "**/*.bbl": true,
+    "**/*.bcf": true,
+    "**/*.blg": true,
+    "**/*.dvi": true,
+    "**/*.fdb_latexmk": true,
+    "**/*.fls": true,
+    "**/*.gz": true,
+    "**/*.idx": true,
+    "**/*.ind": true,
+    "**/*.lof": true,
+    "**/*.lot": true,
+    "**/*.markdown.in": true,
+    "**/*.markdown.lua": true,
+    "**/*.out": true,
+    "**/*.pyg": true,
+    "**/*.pytxcode": true,
+    "**/*.rar": true,
+    "**/*.run.xml": true,
+    "**/*.stderr": true,
+    "**/*.stdout": true,
+    "**/*.tar": true,
+    "**/*.tar.gz": true,
+    "**/*.texmfcache": true,
+    "**/*.tgz": true,
+    "**/CVS": true,
+    "**/pythontex-files-*/": true,
+    "**/svg-inkscape*": true,
+    "**/Thumbs.db": true
+  },
+  "latex-workshop.latex.autoBuild.interval": 1000,
+  "latex-workshop.latex.autoBuild.run": "onSave",
+  "latex-workshop.latex.autoClean.run": "onBuilt",
+  "latex-workshop.latex.build.forceRecipeUsage": false,
+  "latex-workshop.latex.clean.fileTypes": [
+    "*.blg",
+    "*.idx",
+    "*.ind",
+    "*.lof",
+    "*.lot",
+    "*.out",
+    "*.toc",
+    "*.acn",
+    "*.acr",
+    "*.alg",
+    "*.glg",
+    "*.glo",
+    "*.gls",
+    "*.ist",
+    "*.fls",
+    "*.log",
+    "*.fdb_latexmk"
+  ],
+  "latex-workshop.latex.outDir": "%DIR%",
+  "latex-workshop.latex.recipe.default": "latexmk (with bibtex)",
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "latexmk (with bibtex)",
+      "tools": ["latexmk"]
+    },
+    {
+      "name": "pdflatex",
+      "tools": ["pdflatex"]
+    }
+  ],
+  "latex-workshop.latex.rootFile.doNotPrompt": true,
+  "latex-workshop.latex.rootFile.useSubFile": false,
+  "latex-workshop.latex.tools": [
+    {
+      "args": ["-r", "%DIR%/.latexmkrc", "-cd", "-g", "%DOC%"],
+      "command": "/usr/bin/latexmk",
+      "env": {},
+      "name": "latexmk"
+    },
+    {
+      "args": [
+        "-synctex=1",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "%DOC%"
+      ],
+      "command": "/usr/bin/pdflatex",
+      "env": {},
+      "name": "pdflatex"
+    }
+  ],
+  "latex-workshop.latex.watch.files.ignore": ["**/_preamble.tex"],
+  "latex-workshop.message.information.show": false,
+  "latex-workshop.message.log.show": false,
+  "latex-workshop.showContextMenu": true,
+  "latex-workshop.synctex.afterBuild.enabled": true,
+  "latex-workshop.view.pdf.internal.synctex.keybinding": "double-click",
+  "latex-workshop.view.pdf.viewer": "tab",
+  "latex-workshop.view.pdf.zoom": "page-width"
+}
