@@ -3,98 +3,160 @@
 まず提案手法の概要を述べ，次に傾向予測アルゴリズム，急激変化検知アルゴリズム，および切替判断アルゴリズムについて数式を交えて詳述する．
 最後に，HARQとの連携機構と計算量の評価について述べる．
 
-\section{周波数利用効率}
-本システムにおける周波数利用効率 (Spectral Efficiency: SE) の定義および予測モデルについて述べる．
-システム全体の帯域幅を $W$ [Hz]，システムの総リソースブロック (RB) 数を $N_{\mathrm{RB}}^{\mathrm{total}}$ とする．
-ある基地局に割り当てられたRB数を $N_{\mathrm{RB}}$，そのセルスループットを $R$ [bps] とすると，当該基地局に割り当てられた帯域幅 $B$ [Hz] は次式で表される．
+\section{周波数利用効率 (Spectral Efficiency)}
+
+本システムは，マクロセル（Macrocell: M）とマイクロセル（Microcell: m）からなるHetNet環境を対象とする．
+
+マイクロセルを優先してリソースブロック（RB）$N_{\mathrm{RB}}^{\mathrm{m}}$ を割り当て，残余リソース $N_{\mathrm{RB}}^{\mathrm{M}}$ をマクロセルが使用する周波数分割方式を採用する．
+
+ここで，システム全体の周波数利用効率 $\eta_{\mathrm{SE}}^{\mathrm{sys}}$ の最大化を目的とする．
+
+
+
+\subsection{共通定義と観測パラメータ}
+
+システム帯域幅を $W$，総RB数を $N_{\mathrm{RB}}^{\mathrm{total}}$ とする．
+
+各セル $k \in \{\mathrm{m}, \mathrm{M}\}$ における帯域幅 $B^k$ は次式で表される．
+
+
 
 \begin{equation}
-    B = W \cdot \frac{N_{\mathrm{RB}}}{N_{\mathrm{RB}}^{\mathrm{total}}}
-    \label{eq:assigned_bandwidth}
+    B^k = W \cdot \frac{N_{\mathrm{RB}}^k}{N_{\mathrm{RB}}^{\mathrm{total}}}
 \end{equation}
 
-したがって，周波数利用効率 $\eta_{\mathrm{SE}}$ [bps/Hz] は次式で定義される．
+
+
+直前の期間 $T$ において，基地局側で取得可能な観測値セットを $\mathcal{O}^k$ とする．
+
+\begin{itemize}
+
+    \item $R_{\mathrm{obs}}^k$: 送出量より算出された観測スループット (DL UE Throughput)
+
+    \item $\lambda^k$: 到来量 (Ingress data at PDCP)
+
+    \item $\bar{D}^k$: 観測された平均遅延 (MAC/RLC measurement)
+
+    \item $P_{\mathrm{out}}^k$: パケットドロップ率 (RLC SDU drop rate)
+
+    \item $\gamma_{\mathrm{obs}}^k$: UEからのCQI報告に基づき推定された観測SINR
+
+    \item $P_{\mathrm{t, ref}}^k$: 観測時の送信電力
+
+    \item $N_{\mathrm{RB, obs}}^k$: 観測時の割り当てRB数
+
+\end{itemize}
+
+\subsection{マイクロセル (Microcell) の定式化}
+
+マイクロセルは優先的にリソースが割り当てられるが，自身の送信電力 $P_{\mathrm{t}}^{\mathrm{m}}$ を調整することで，エネルギー効率の改善とマクロセルへの干渉抑制を図る．
+
+まず，物理層容量を予測する．マイクロセルのSINR $\hat{\gamma}^{\mathrm{m}}$ は，自身の送信電力密度に比例してスケーリングされると仮定する．
+
+マクロセルからの干渉は定常的なフロアノイズとして扱う近似を用いると，次ステップの送信電力 $P_{\mathrm{t}}^{\mathrm{m}}$ および割り当てRB数 $N_{\mathrm{RB}}^{\mathrm{m}}$ に対する予測SINRは次式となる．
 
 \begin{equation}
-    \eta_{\mathrm{SE}} = \frac{R}{B} = \frac{R}{W} \cdot \frac{N_{\mathrm{RB}}^{\mathrm{total}}}{N_{\mathrm{RB}}}
-    \label{eq:spectral_efficiency_basic}
+    \hat{\gamma}^{\mathrm{m}} = \gamma_{\mathrm{obs}}^{\mathrm{m}} \cdot \frac{P_{\mathrm{t}}^{\mathrm{m}}}{P_{\mathrm{t, ref}}^{\mathrm{m}}} \cdot \frac{N_{\mathrm{RB, obs}}^{\mathrm{m}}}{N_{\mathrm{RB}}^{\mathrm{m}}}
+    \label{eq:memo_micro_sinr_pred}
 \end{equation}
 
-本研究では，RB割り当ておよび送信電力制御の同時最適化を行う．
-直前の観測期間 $T$ [s] における観測値に基づき，次ステップで割り当てるRB数 $N_{\mathrm{RB}}^{\mathrm{alloc}}$ および基地局の総送信電力 $P_{\mathrm{t}}$ [W] に対するスループットを予測する．
-
-まず，物理層における最大伝送容量を推定する．
-直前の期間 $T$ において当該基地局に割り当てられたRB数を $N_{\mathrm{RB}}^{\mathrm{obs}}$，観測されたセルスループットを $R_{\mathrm{obs}}$ [bps] とする．
-このとき，観測された周波数利用効率に基づき，セル内の実効的なSINR（Signal-to-Interference-plus-Noise Ratio）$\gamma_{\mathrm{obs}}$ は，シャノンの公式の逆関数を用いて次式で導出できる．
+これより，ドロップ率 $P_{\mathrm{out}}^{\mathrm{m}}$ を考慮した物理容量 $C^{\mathrm{m}}$ は次式で予測される．
 
 \begin{equation}
-    \gamma_{\mathrm{obs}} = 2^{\eta_{\mathrm{SE}}^{\mathrm{obs}}} - 1 = 2^{\left( \frac{R_{\mathrm{obs}}}{W} \cdot \frac{N_{\mathrm{RB}}^{\mathrm{total}}}{N_{\mathrm{RB}}^{\mathrm{obs}}} \right)} - 1
-    \label{eq:estimated_sinr}
+    C^{\mathrm{m}} = B^{\mathrm{m}} \cdot \log_2 \left( 1 + \hat{\gamma}^{\mathrm{m}} \right) \cdot \left(1 - P_{\mathrm{out}}^{\mathrm{m}}\right)
 \end{equation}
 
-次に，観測時の基地局総送信電力を $P_{\mathrm{t}}^{\mathrm{ref}}$ [W] とする．
-次ステップにおいて総送信電力を $P_{\mathrm{t}}$，割り当てRB数を $N_{\mathrm{RB}}^{\mathrm{alloc}}$ に変更した場合，単位周波数あたりの電力密度および受信雑音帯域幅の変化を考慮すると，予測SINR $\hat{\gamma}$ は次式でスケーリングされる．
+トラフィック需要 $R_{\mathrm{req}}^{\mathrm{m}}$ は，観測された到来量 $\lambda^{\mathrm{m}}$ と遅延 $\bar{D}^{\mathrm{m}}$ を用いてリトルの法則より算出する．
 
 \begin{equation}
-    \hat{\gamma}\left(P_{\mathrm{t}}, N_{\mathrm{RB}}^{\mathrm{alloc}}\right) = \gamma_{\mathrm{obs}} \cdot \frac{P_{\mathrm{t}}}{P_{\mathrm{t}}^{\mathrm{ref}}} \cdot \frac{N_{\mathrm{RB}}^{\mathrm{obs}}}{N_{\mathrm{RB}}^{\mathrm{alloc}}}
-    \label{eq:scaled_sinr}
+    R_{\mathrm{req}}^{\mathrm{m}} = \lambda^{\mathrm{m}} + \frac{\lambda^{\mathrm{m}} \bar{D}^{\mathrm{m}}}{T}
 \end{equation}
 
-これより，決定変数 $P_{\mathrm{t}}$ と $N_{\mathrm{RB}}^{\mathrm{alloc}}$ を用いた場合の物理層容量 $C$ [bps] は次式で推定される．
+したがって，マイクロセルの予測スループット $\hat{R}^{\mathrm{m}}$ は需要と容量のボトルネックにより決定される．
+
+
 
 \begin{equation}
-    C = \left( W \cdot \frac{N_{\mathrm{RB}}^{\mathrm{alloc}}}{N_{\mathrm{RB}}^{\mathrm{total}}} \right) \cdot \log_2 \left( 1 + \hat{\gamma}\left(P_{\mathrm{t}}, N_{\mathrm{RB}}^{\mathrm{alloc}}\right) \right) \cdot \left(1 - P_{\mathrm{out}}\right)
-    \label{eq:physical_capacity}
+    \hat{R}^{\mathrm{m}} = \min \left( C^{\mathrm{m}}, R_{\mathrm{req}}^{\mathrm{m}} \right)
 \end{equation}
 
-次に，トラフィックの需要を算出する．
-期間 $T$ における平均パケット到着率を $\lambda$ [bps]，平均パケット遅延を $\bar{D}$ [s] とすると，リトルの法則に基づき，システムが処理すべき必要レート $R_{\mathrm{req}}$ [bps] は次式で表される．
+\subsection{マクロセル (Macrocell) の定式化}
+マクロセルは，マイクロセルが使用しなかった残余RBを使用する（$N_{\mathrm{RB}}^{\mathrm{M}} = N_{\mathrm{RB}}^{\mathrm{total}} - N_{\mathrm{RB}}^{\mathrm{m}}$）。
+マクロセルの送信電力は一定であり制御対象外とするが，マイクロセルからの隣接チャネル干渉（ACI）を受ける．
+干渉電力そのものは観測不可であるため，マイクロセルの送信電力比に基づいてマクロセルのSINR劣化を推定する．
+
+マイクロセルの送信電力 $P_{\mathrm{t}}^{\mathrm{m}}$ が増加するとACIが増大し，マクロセルのSINR $\hat{\gamma}^{\mathrm{M}}$ は劣化する．この関係を結合係数 $\alpha \geq 0$ を用いた逆比例モデルで表現する．
 
 \begin{equation}
-    R_{\mathrm{req}} = \lambda + \frac{\lambda \bar{D}}{T}
-    \label{eq:traffic_demand}
+    \hat{\gamma}^{\mathrm{M}} = \gamma_{\mathrm{obs}}^{\mathrm{M}} \cdot \underbrace{ \left( \frac{P_{\mathrm{t}}^{\mathrm{m}}}{P_{\mathrm{t, ref}}^{\mathrm{m}}} \right)^{-\alpha} }_{\text{ACIによるSINR劣化係数}} \cdot \frac{N_{\mathrm{RB, obs}}^{\mathrm{M}}}{N_{\mathrm{RB}}^{\mathrm{M}}}
+    \label{eq:macro_sinr_degradation}
 \end{equation}
 
-実効的な予測セルスループット $\hat{R}$ [bps] は，物理容量 $C$ とトラフィック需要 $R_{\mathrm{req}}$ のボトルネックとして算出される．
+ここで，$\alpha$ は周波数離隔やフィルタ特性に依存する定数であり，$\alpha=0$ は干渉無視，値が大きいほど強い干渉を示す．
+マクロセルの予測スループット $\hat{R}^{\mathrm{M}}$ は以下の通りとなる．
 
 \begin{equation}
-    \hat{R} = \min \left( C, R_{\mathrm{req}} \right)
-    \label{eq:throughput_prediction}
+    \hat{R}^{\mathrm{M}} = \min \left( B^{\mathrm{M}} \log_2(1 + \hat{\gamma}^{\mathrm{M}})(1 - P_{\mathrm{out}}^{\mathrm{M}}), R_{\mathrm{req}}^{\mathrm{M}} \right)
 \end{equation}
 
-最終的に，予測周波数利用効率 $\hat{\eta}_{\mathrm{SE}}$ は次式となる．
+以上より，システム全体の予測周波数利用効率 $\hat{\eta}_{\mathrm{SE}}^{\mathrm{sys}}$ [bps/Hz] は，両セルのスループットの和をシステム帯域幅で除算したものとして定義される．
 
 \begin{equation}
-    \hat{\eta}_{\mathrm{SE}} = \frac{\hat{R}}{W} \cdot \frac{N_{\mathrm{RB}}^{\mathrm{total}}}{N_{\mathrm{RB}}^{\mathrm{alloc}}}
-    \label{eq:predicted_se}
+    \hat{\eta}_{\mathrm{SE}}^{\mathrm{sys}} = \frac{\hat{R}^{\mathrm{m}} + \hat{R}^{\mathrm{M}}}{W}
 \end{equation}
 
-\section{エネルギー効率}
-次に，本システムにおけるエネルギー効率 (Energy Efficiency: EE) の定義および予測モデルについて述べる．
-エネルギー効率 $\eta_{\mathrm{EE}}$ [bits/J] は，消費電力に対するスループットの比として次式で定義される．
+\section{エネルギー効率 (Energy Efficiency)}
+
+本研究では，マイクロセルの送信電力調整によるエネルギー効率の最大化に着目する．
+
+システム全体のエネルギー効率も定義可能であるが，最適化の主目的であるマイクロセルのエネルギー効率を優先的に定式化する．
+
+
+
+\subsection{マイクロセルのエネルギー効率}
+
+マイクロセルのエネルギー効率 $\eta_{\mathrm{EE}}^{\mathrm{m}}$ [bits/J] は，消費電力に対する有効スループットの比として定義される．
+
+
 
 \begin{equation}
-    \eta_{\mathrm{EE}} = \frac{R}{P_{\mathrm{c}}}
-    \label{eq:energy_efficiency_basic}
+    \eta_{\mathrm{EE}}^{\mathrm{m}} = \frac{\hat{R}^{\mathrm{m}}}{P_{\mathrm{c}}^{\mathrm{m}}}
 \end{equation}
 
-ここで，$R$ はスループット [bps]であり，$P_{\mathrm{c}}$ は総消費電力 [W] とする．
 
-本研究では，システムの総消費電力 $P_{\mathrm{c}}$ [W] を，固定電力と送信電力に依存する変動電力の和としてモデル化する．
-ここで，固定回路電力を $P_{\mathrm{c}}^{\mathrm{fix}}$ [W]，基地局の総送信電力を $P_{\mathrm{t}}$ [W] とする．
-また，ローカル5G基地局（Sub6帯）における電力増幅器の効率 $\eta_{\mathrm{PA}}$ を約 40\% と想定し，その逆数である消費電力係数を $\xi = 1/\eta_{\mathrm{PA}} = 2.5$ と設定する．
-これに基づき，総消費電力は次式で表される．
+
+ここで，マイクロセルの総消費電力 $P_{\mathrm{c}}^{\mathrm{m}}$ は，固定回路電力 $P_{\mathrm{fix}}^{\mathrm{m}}$ と，送信電力 $P_{\mathrm{t}}^{\mathrm{m}}$ に依存する変動電力の和でモデル化される．
+
+電力増幅器（PA）の効率に関連する係数を $\xi$ とすると，次式となる．
+
+
 
 \begin{equation}
-    P_{\mathrm{c}} = P_{\mathrm{c}}^{\mathrm{fix}} + \xi P_{\mathrm{t}}
-    \label{eq:power_consumption_model}
+    P_{\mathrm{c}}^{\mathrm{m}} = P_{\mathrm{fix}}^{\mathrm{m}} + \xi P_{\mathrm{t}}^{\mathrm{m}}
 \end{equation}
 
-したがって，予測エネルギー効率 $\hat{\eta}_{\mathrm{EE}}$ は次式により算出される．
+
+
+したがって，決定変数 $P_{\mathrm{t}}^{\mathrm{m}}, N_{\mathrm{RB}}^{\mathrm{m}}$ に対する予測エネルギー効率は次式で表される．
+
+
 
 \begin{equation}
-    \hat{\eta}_{\mathrm{EE}} = \frac{\hat{R}}{P_{\mathrm{c}}^{\mathrm{fix}} + \xi P_{\mathrm{t}}}
-    \label{eq:predicted_ee}
+    \hat{\eta}_{\mathrm{EE}}^{\mathrm{m}} (P_{\mathrm{t}}^{\mathrm{m}}, N_{\mathrm{RB}}^{\mathrm{m}}) = \frac{\min \left( C^{\mathrm{m}}(P_{\mathrm{t}}^{\mathrm{m}}, N_{\mathrm{RB}}^{\mathrm{m}}), R_{\mathrm{req}}^{\mathrm{m}} \right)}{P_{\mathrm{fix}}^{\mathrm{m}} + \xi P_{\mathrm{t}}^{\mathrm{m}}}
 \end{equation}
 
-\begin{equation} \hat{\gamma}^{\mathrm{M}}(P_{\mathrm{t}}^{\mu}) = \gamma_{\mathrm{obs}}^{\mathrm{M}} \cdot \frac{1}{1 + \beta \cdot P_{\mathrm{t}}^{\mu}} \end{equation}
+
+
+\subsection{システム全体のエネルギー効率（参考）}
+
+マクロセルの消費電力を $P_{\mathrm{c}}^{\mathrm{M}}$（固定値またはマクロ側の電力制御に依存）とした場合，HetNet全体としてのエネルギー効率は次式となる．
+
+
+
+\begin{equation}
+    \hat{\eta}_{\mathrm{EE}}^{\mathrm{sys}} = \frac{\hat{R}^{\mathrm{m}} + \hat{R}^{\mathrm{M}}}{P_{\mathrm{c}}^{\mathrm{m}} + P_{\mathrm{c}}^{\mathrm{M}}}
+\end{equation}
+
+
+
+最適化問題としては，$\hat{\eta}_{\mathrm{SE}}^{\mathrm{sys}}$ の最大化（マクロの劣化を防ぎつつ全体の容量確保）と，$\hat{\eta}_{\mathrm{EE}}^{\mathrm{m}}$ の最大化（マイクロの省電力化）の多目的最適化，あるいは制約付き最適化問題として定式化される．
