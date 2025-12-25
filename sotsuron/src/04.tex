@@ -93,7 +93,7 @@
 \section{エネルギー効率 (Energy Efficiency)}
 
 本研究では，マイクロセルの送信電力調整によるエネルギー効率の最大化に着目する．
-システム全体のエネルギー効率も定義可能であるが，最適化の主目的であるマイクロセルのエネルギー効率を優先的に定式化する．
+システム全体のエネルギー効率も定義可能ですが，最適化の主目的となるマイクロセルのエネルギー効率を優先的に定式化する．
 
 \subsection{マイクロセルのエネルギー効率}
 
@@ -121,10 +121,47 @@
 
 \section{最適化問題の定式化}
 
-本研究の目的は，システム全体の周波数利用効率 $\hat{\eta}_{\mathrm{SE}}^{\mathrm{sys}}$ およびマイクロセルのエネルギー効率 $\hat{\eta}_{\mathrm{EE}}^{\mathrm{m}}$ を最大化する，マイクロセルの送信電力 $P_{\mathrm{t}}^{\mathrm{m}}$ およびRB割り当て数 $N_{\mathrm{RB}}^{\mathrm{m}}$ を決定することである．
+本研究の目的は，システム全体の周波数利用効率 $\hat{\eta}_{\mathrm{SE}}^{\mathrm{sys}}$ およびマイクロセルのエネルギー効率 $\hat{\eta}_{\mathrm{EE}}^{\mathrm{m}}$ を最大化する，マイクロセルの送信電力 $P_{\mathrm{t}}^{\mathrm{m}}$ およびRB割り当て数 $N_{\mathrm{RB}}^{\mathrm{m}}$ を決定することです．
 
 これら2つの指標は単位および数値のオーダーが大きく異なるため，単純な線形加重和ではスケールの大きいEEが支配的となる．
-本稿ではスケールの違いを吸収し，かつ両指標の改善率を公平に評価可能な対数効用関数（Logarithmic Utility Function）を用いた多目的最適化問題として定式化する．
+本稿では，この問題に対処するため，Cobb-Douglas効用関数（Cobb-Douglas utility function）を用いた多目的最適化問題として定式化する．
+
+Cobb-Douglas効用関数は，異なるスケールを持つ複数の指標を統合する際に有効であり，スケール不変性と乗法的構造という2つの重要な特性を持つ．
+スケール不変性により，単位やオーダーが異なるSEとEEを公平に扱うことが可能となる．
+また，乗法的構造により，一方の指標のみを極端に優先するのではなく，両指標をバランスよく改善するインセンティブが与えられる．
+
+さらに，本稿ではCobb-Douglas効用関数を対数変換した形式で定式化する．
+対数変換により，最適解を保存したまま数値計算の安定性が向上し，かつ目的関数が凹関数となるため最適化が容易になるという利点がある．
+
+\subsection{決定変数の定義}
+
+\subsubsection{RB数の離散集合}
+マイクロセルに割り当て可能なRB数 $N_{\mathrm{RB}}^{\mathrm{m}}$ は，システム全体のRB数 $N_{\mathrm{RB}}^{\mathrm{total}}$ に基づいて制限される．
+選択可能なRB数の集合 $\mathcal{N}$ を以下のように定義する．
+
+\begin{equation}
+    \mathcal{N} = \left\{ n \mid n \in \mathbb{Z}, 1 \le n \le N_{\mathrm{RB}}^{\mathrm{total}} \right\}
+\end{equation}
+
+\subsubsection{送信電力の離散集合}
+マイクロセルの送信電力 $P_{\mathrm{t}}^{\mathrm{m}}$ は，1dB刻みで調整可能な離散変数とする．
+現在の設定送信電力を $P_{\mathrm{t, current}}^{\mathrm{m}}$，マイクロセルのカバレッジがマクロセルのカバレッジと内接する（境界が接する）際の送信電力を $P_{\mathrm{t, inscribed}}^{\mathrm{m}}$ とする．
+これに基づき，選択可能な送信電力の集合 $\mathcal{P}$ を以下のように定義する．
+
+\begin{equation}
+    \mathcal{P} = \left\{ P \mid P_{\mathrm{dB}} \in \{ P_{\mathrm{min, dB}}, P_{\mathrm{min, dB}} + 1, \dots, P_{\mathrm{max, dB}} \}, P = 10^{\frac{P_{\mathrm{dB}} - 30}{10}} \right\}
+\end{equation}
+
+ここで，$P_{\mathrm{min, dB}}$ および $P_{\mathrm{max, dB}}$ はそれぞれ $P_{\mathrm{t, current}}^{\mathrm{m}}$ および $P_{\mathrm{t, inscribed}}^{\mathrm{m}}$ をdBm単位で表した値とする．
+
+\subsubsection{トラフィック負荷}
+リソース配分の公平性とマイクロセルへの優先度を評価するため，各セル $k$ におけるトラフィック負荷 $\rho^k$ を，予測容量に対する要求量の比として定義する．
+
+\begin{equation}
+    \rho^k = \frac{R_{\mathrm{req}}^k}{\hat{R}_{\mathrm{cap}}^k}
+\end{equation}
+
+ここで，$\hat{R}_{\mathrm{cap}}^k$ はパケットドロップ等を考慮しない物理層の最大予測容量（$C^k$ に相当）です．
 
 \subsection{目的関数}
 重み係数 $w$ ($0 \le w \le 1$) を用いて，目的関数 $U$ を次式で定義する．
@@ -134,16 +171,17 @@
 \end{equation}
 
 \subsection{制約条件}
-最適化における制約条件は以下の通りである．
+最適化における制約条件は以下の通りです．
 
 \begin{align}
-    \text{maximize} \quad   & U(P_{\mathrm{t}}^{\mathrm{m}}, N_{\mathrm{RB}}^{\mathrm{m}})                     \\
-    \text{subject to} \quad & P_{\mathrm{t}}^{\min} \le P_{\mathrm{t}}^{\mathrm{m}} \le P_{\mathrm{t}}^{\max}, \\
-                            & 1 \le N_{\mathrm{RB}}^{\mathrm{m}} \le N_{\mathrm{RB}}^{\mathrm{total}} - 1,     \\
-                            & N_{\mathrm{RB}}^{\mathrm{m}} \in \mathbb{Z}
+    \text{maximize} \quad   & U(P_{\mathrm{t}}^{\mathrm{m}}, N_{\mathrm{RB}}^{\mathrm{m}})                 \\
+    \text{subject to} \quad & N_{\mathrm{RB}}^{\mathrm{m}} \in \mathcal{N}, \label{eq:const_rb_discrete}   \\
+                            & P_{\mathrm{t}}^{\mathrm{m}} \in \mathcal{P}, \label{eq:const_power_discrete} \\
+                            & \rho^{\mathrm{m}} \le \rho^{\mathrm{M}} \label{eq:const_load_balance}
 \end{align}
 
-ここで，$P_{\mathrm{t}}^{\min}, P_{\mathrm{t}}^{\max}$ はマイクロセル基地局の送信電力の許容範囲であり，$N_{\mathrm{RB}}^{\mathrm{m}}$ は整数制約を持つ．
-マクロセルには最低1RB以上を残すものとする（$N_{\mathrm{RB}}^{\mathrm{total}} - N_{\mathrm{RB}}^{\mathrm{m}} \ge 1$）．
+式（\ref{eq:const_rb_discrete}）はマイクロセルに割り当て可能なRB数の範囲を定義し，式（\ref{eq:const_power_discrete}）は送信電力が1dBステップの離散値をとることを示します．
+式（\ref{eq:const_load_balance}）はマイクロセルのトラフィック負荷がマクロセル以下となることを強制する制約です．
+この負荷制約により，マイクロセルに十分なリソース（RBおよび電力）を優先的に割り当て，局所的な輻輳の回避を保証します．
 
-この問題は，連続変数（電力）と離散変数（RB数）が混在する混合整数非線形計画問題（MINLP）となる．
+この問題は，離散変数（RB数セット $\mathcal{N}$ および電力セット $\mathcal{P}$）の組み合わせ最適化問題となります．
